@@ -1,7 +1,8 @@
-const backendUrl = "https://thijssenware.github.io/MyBoardGames/"; // Replace with your Render backend URL
+// Replace with your Render backend URL
+const backendUrl = "hhttps://myboardgames-backend.onrender.com"; 
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetch(`${backendUrl}/api/games`)
+    fetch(`${backendUrl}/api/games`)  // Connect to your backend API
         .then(response => response.json())
         .then(data => {
             const gamesList = document.getElementById("games-list");

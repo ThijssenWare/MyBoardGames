@@ -12,8 +12,13 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000; // Port for server, default to 3000 for local dev
 
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use(cors()); // Enable Cross-Origin Resource Sharing (CORS)
+// CORS setup
+app.use(cors({
+  origin: "https://thijssenware.github.io/MyBoardGames/", // Replace with your GitHub Pages URL
+}));
+
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // Database connection
 const pool = new Pool({
@@ -36,13 +41,15 @@ app.get('/api/games', async (req, res) => {
 
 // Route for adding a new game
 app.post('/api/games', async (req, res) => {
-  const { name, players, category, language, rating, last_played } = req.body;
+  const { name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl } = req.body;
+  
   try {
     const result = await pool.query(
-      'INSERT INTO games (name, players, category, language, rating, last_played) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [name, players, category, language, rating, last_played]
+      'INSERT INTO games (name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl) ' +
+      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+      [name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl]
     );
-    res.status(201).json(result.rows[0]); // Send the newly added game as JSON response
+    res.status(201).json(result.rows[0]);  // Send the newly added game as JSON response
   } catch (err) {
     console.error(err);
     res.status(500).send('Server error');
