@@ -1,30 +1,55 @@
-// server.js
+// backend/server.js
 
-// Import required modules
 const express = require('express');
-const bodyParser = require('body-parser');
+const { Pool } = require('pg'); // PostgreSQL client for Node.js
 const cors = require('cors');
+const dotenv = require('dotenv');
 
-// Import routes
-const gamesRoutes = require('./routes/games'); // Correctly import the games route
+// Load environment variables
+dotenv.config();
 
-// Create an instance of express
+// Initialize Express app
 const app = express();
+const port = process.env.PORT || 3000; // Port for server, default to 3000 for local dev
 
-// Use middlewares
-app.use(bodyParser.json());  // Parses incoming JSON requests
-app.use(cors());  // Allows cross-origin requests, useful for connecting frontend and backend
+app.use(express.json()); // Middleware to parse JSON bodies
+app.use(cors()); // Enable Cross-Origin Resource Sharing (CORS)
 
-// Register routes
-app.use('/api/games', gamesRoutes); // Register the games route with the "/api/games" path prefix
-
-// Define a simple route to check the server status
-app.get('/', (req, res) => {
-    res.send('Backend server is running!');
+// Database connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL, // Fetch database connection URL from .env
+  ssl: {
+    rejectUnauthorized: false, // Disable SSL validation for self-signed certificates (common in cloud environments)
+  },
 });
 
-// Set up the port for the server
-const PORT = process.env.PORT || 5000;  // Default to 5000 if no environment variable is set
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Route for fetching all games
+app.get('/api/games', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM games');
+    res.json(result.rows); // Send all games from the database as JSON response
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+// Route for adding a new game
+app.post('/api/games', async (req, res) => {
+  const { name, players, category, language, rating, last_played } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO games (name, players, category, language, rating, last_played) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [name, players, category, language, rating, last_played]
+    );
+    res.status(201).json(result.rows[0]); // Send the newly added game as JSON response
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
