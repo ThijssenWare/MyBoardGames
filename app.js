@@ -1,4 +1,4 @@
-const backendUrl = "https://my-backend.onrender.com"; // Replace with your Render backend URL
+const backendUrl = "https://thijssenware.github.io/MyBoardGames/"; // Replace with your Render backend URL
 
 document.addEventListener("DOMContentLoaded", () => {
     fetch(`${backendUrl}/api/games`)
