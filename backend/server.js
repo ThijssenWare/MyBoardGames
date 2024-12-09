@@ -15,6 +15,7 @@ const port = process.env.PORT || 3000; // Port for server, default to 3000 for l
 // CORS setup - safely allow only specific domains
 const allowedOrigins = [
   "https://thijssenware.github.io", // GitHub Pages URL
+  "https://thijssenware.github.io/MyBoardGames", // If your project is under the MyBoardGames folder
   "http://localhost:5500",          // Local testing URL (if using VS Code Live Server or another local server)
 ];
 
