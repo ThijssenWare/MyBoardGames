@@ -12,10 +12,13 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000; // Port for server, default to 3000 for local dev
 
-// CORS setup
 app.use(cors({
-  origin: ["https://thijssenware.github.io/MyBoardGames/", "null"], // Add "null" for local file testing
-}));
+    origin: [
+      "https://thijssenware.github.io", // GitHub Pages URL
+      "http://localhost:5500",          // Local testing URL (if using VS Code Live Server or another local server)
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allow these methods
+  }));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -39,22 +42,27 @@ app.get('/api/games', async (req, res) => {
   }
 });
 
-// Route for adding a new game
 app.post('/api/games', async (req, res) => {
-  const { name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl } = req.body;
-  
-  try {
-    const result = await pool.query(
-      'INSERT INTO games (name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl) ' +
-      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-      [name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl]
-    );
-    res.status(201).json(result.rows[0]);  // Send the newly added game as JSON response
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
+    const { name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl } = req.body;
+
+    // Validation
+    if (!name || !minPlayers || !maxPlayers || !category || !language || !owner || !BGGUrl || !tag || !imageUrl) {
+        return res.status(400).json({ error: "All fields except 'lastPlayed' and 'rating' are required." });
+    }
+
+    try {
+        const result = await pool.query(
+            'INSERT INTO games (name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl) ' +
+            'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+            [name, minPlayers, maxPlayers, category, language, rating || null, lastPlayed || null, owner, BGGUrl, tag, imageUrl]
+        );
+        res.status(201).json(result.rows[0]);  // Send the newly added game as JSON response
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error');
+    }
 });
+
 
 // Start the server
 app.listen(port, () => {
