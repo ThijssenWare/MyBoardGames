@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000; // Port for server, default to 3000 for l
 
 // CORS setup
 app.use(cors({
-  origin: "https://thijssenware.github.io/MyBoardGames/", // Replace with your GitHub Pages URL
+  origin: ["https://thijssenware.github.io/MyBoardGames/", "null"], // Add "null" for local file testing
 }));
 
 // Middleware to parse JSON bodies
