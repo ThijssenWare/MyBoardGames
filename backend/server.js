@@ -42,6 +42,7 @@ app.get('/api/games', async (req, res) => {
   }
 });
 
+// Adding a new game
 app.post('/api/games', async (req, res) => {
     const { name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl } = req.body;
 
@@ -62,6 +63,77 @@ app.post('/api/games', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+// Update game
+app.put('/api/games/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl } = req.body;
+    
+    try {
+      const result = await pool.query(
+        `UPDATE games SET name = $1, minPlayers = $2, maxPlayers = $3, category = $4, language = $5, 
+         rating = $6, lastPlayed = $7, owner = $8, BGGUrl = $9, tag = $10, imageUrl = $11 WHERE id = $12 RETURNING *`,
+        [name, minPlayers, maxPlayers, category, language, rating, lastPlayed, owner, BGGUrl, tag, imageUrl, id]
+      );
+      res.json(result.rows[0]); // Return updated game
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server error');
+    }
+  });
+  
+  // Delete game
+  app.delete('/api/games/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+      const result = await pool.query('DELETE FROM games WHERE id = $1 RETURNING *', [id]);
+      if (result.rowCount === 0) {
+        return res.status(404).send('Game not found');
+      }
+      res.status(204).send(); // Return no content on successful deletion
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server error');
+    }
+  });
+  
+
+// Search and filter
+app.get('/api/games', async (req, res) => {
+    const { name, category, minPlayers, maxPlayers, rating } = req.query;
+    let query = 'SELECT * FROM games WHERE 1=1';
+    const values = [];
+  
+    if (name) {
+      query += ' AND name ILIKE $' + (values.length + 1);
+      values.push(`%${name}%`);
+    }
+    if (category) {
+      query += ' AND category ILIKE $' + (values.length + 1);
+      values.push(`%${category}%`);
+    }
+    if (minPlayers) {
+      query += ' AND minPlayers >= $' + (values.length + 1);
+      values.push(minPlayers);
+    }
+    if (maxPlayers) {
+      query += ' AND maxPlayers <= $' + (values.length + 1);
+      values.push(maxPlayers);
+    }
+    if (rating) {
+      query += ' AND rating >= $' + (values.length + 1);
+      values.push(rating);
+    }
+  
+    try {
+      const result = await pool.query(query, values);
+      res.json(result.rows); // Send filtered games as response
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server error');
+    }
+  });
+  
 
 
 // Start the server
