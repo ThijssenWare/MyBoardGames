@@ -1,107 +1,75 @@
 // Replace with your Render backend URL
 const backendUrl = "https://myboardgames-backend.onrender.com"; // Ensure "https" is correct here
 
+// Wait for the DOM to fully load before executing any JavaScript
 document.addEventListener("DOMContentLoaded", () => {
-    // Fetch and display games
+    // Initially fetch and display games when the page loads
     fetchGames();
-
-    // Setup form for adding new games
+    
+    // Setup the form for adding a new game
     setupTestingForm();
 
-    // Setup search input event
-    document.getElementById("search-btn").addEventListener("click", searchGames);
-    document.getElementById("search-input").addEventListener("keyup", searchGames);
+    // Setup the search functionality
+    setupSearch();
+
+    // Setup the filter functionality
+    setupFilters();
 });
 
-// Function to fetch and display games
+// Function to fetch and display all games from the backend API
 function fetchGames() {
-    fetch(`${backendUrl}/api/games`)
-        .then((response) => response.json())
+    fetch(`${backendUrl}/api/games}`) // Make a GET request to fetch all games
+        .then((response) => response.json()) // Convert the response into JSON format
         .then((data) => {
             const gamesList = document.getElementById("games-list");
-            gamesList.innerHTML = ""; // Clear previous content
+            gamesList.innerHTML = ""; // Clear previous content in the list
+
+            // If no games are found, display a message
             if (data.length === 0) {
                 gamesList.innerHTML = "<p>No games found!</p>";
             } else {
-                data.forEach((game) => {
-                    const gameDiv = document.createElement("div");
-                    gameDiv.classList.add("game-item");
-                    gameDiv.innerHTML = `
-                        <h3>${game.name}</h3>
-                        <p>Players: ${game.minPlayers} - ${game.maxPlayers}</p>
-                        <p>Category: ${game.category}</p>
-                        <p>Rating: ${game.rating}</p>
-                        <p>Owner: ${game.owner}</p>
-                        <img src="${game.imageUrl}" alt="${game.name}" style="max-width:150px;">
-                        <button class="update-btn" onclick="updateGame(${game.id})">Update</button>
-                        <button class="delete-btn" onclick="deleteGame(${game.id})">Delete</button>
-                    `;
-                    gamesList.appendChild(gameDiv);
-                });
+                // Store games in a global variable for easy access during searching and filtering
+                window.allGames = data; 
+
+                // Display all games initially
+                displayGames(data);
             }
         })
         .catch((error) => {
-            console.error("Error fetching games:", error);
+            console.error("Error fetching games:", error); // If there's an error, log it
             document.getElementById("games-list").innerHTML = "<p>Error loading games!</p>";
         });
 }
 
-// Handle game update
-function updateGame(gameId) {
-    // Collect updated data (you could populate these from a form in your app)
-    const updatedData = {
-        name: "Updated Game Name",  // Collect from form or input fields
-        minPlayers: 3,
-        maxPlayers: 5,
-        category: "Strategy",
-        language: "English",
-        rating: 4.5,
-        lastPlayed: "2024-12-08",
-        owner: "John Doe",
-        BGGUrl: "https://example.com",
-        tag: "Competitive",
-        imageUrl: "https://example.com/image.jpg"
-    };
+// Function to display games (used for both initial load and filtered search)
+function displayGames(games) {
+    const gamesList = document.getElementById("games-list");
+    gamesList.innerHTML = ""; // Clear the current list of games
 
-    fetch(`${backendUrl}/api/games/${gameId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
-    })
-    .then(response => response.json())
-    .then(updatedGame => {
-        console.log("Game updated:", updatedGame);
-        fetchGames();  // Refresh the game list after update
-    })
-    .catch(error => {
-        console.error("Error updating game:", error);
+    // Loop through each game and create an HTML structure for each one
+    games.forEach((game) => {
+        const gameDiv = document.createElement("div");
+        gameDiv.innerHTML = `
+            <h2>${game.name}</h2>
+            <p>Players: ${game.minplayers || 'N/A'} - ${game.maxplayers || 'N/A'}</p>
+            <p>Category: ${game.category}</p>
+            <p>Rating: ${game.rating || "N/A"}</p>
+            <p>Owner: ${game.owner}</p>
+            <img src="${game.imageurl}" alt="${game.name}" style="max-width:150px;">
+        `;
+        gamesList.appendChild(gameDiv); // Add the game to the list
     });
 }
 
-// Handle game delete
-function deleteGame(gameId) {
-    fetch(`${backendUrl}/api/games/${gameId}`, {
-        method: 'DELETE',
-    })
-    .then(() => {
-        console.log("Game deleted");
-        fetchGames();  // Refresh the game list after deletion
-    })
-    .catch(error => {
-        console.error("Error deleting game:", error);
-    });
-}
-
-// Testing bit: Setup form to add a new game
+// Function to handle adding a new game
 function setupTestingForm() {
     const form = document.getElementById("add-game-form");
     if (!form) return; // Exit if the form doesn't exist
 
     form.addEventListener("submit", (event) => {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault(); // Prevent the default form submission behavior
 
+        // Collect data from the form
         const gameData = {
             name: document.getElementById("name").value,
             minPlayers: document.getElementById("minPlayers").value,
@@ -116,56 +84,83 @@ function setupTestingForm() {
             imageUrl: document.getElementById("imageUrl").value,
         };
 
+        // Send a POST request to the backend to add the new game
         fetch(`${backendUrl}/api/games`, {
-            method: "POST",
+            method: "POST", // Set the request method to POST
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json", // Set the header to indicate we're sending JSON data
             },
-            body: JSON.stringify(gameData),
+            body: JSON.stringify(gameData), // Convert the game data to a JSON string
         })
             .then((response) => {
                 if (!response.ok) throw new Error("Failed to add game");
-                return response.json();
+                return response.json(); // If successful, convert the response to JSON
             })
             .then((newGame) => {
-                alert("Game added successfully!");
-                fetchGames(); // Refresh games list
+                alert("Game added successfully!"); // Notify the user that the game was added
+                fetchGames(); // Refresh the game list after adding a new game
             })
             .catch((error) => {
-                console.error("Error adding game:", error);
-                alert("Error adding game");
+                console.error("Error adding game:", error); // If there's an error, log it
+                alert("Error adding game"); // Notify the user if there's an error
             });
     });
 }
 
-// Function to search games based on name (can be extended to more filters)
-function searchGames() {
-    const searchQuery = document.getElementById("search-input").value;
-    fetch(`${backendUrl}/api/games?name=${searchQuery}`)
-        .then(response => response.json())
-        .then(data => {
-            const gamesList = document.getElementById("games-list");
-            gamesList.innerHTML = ''; // Clear current list
-            if (data.length === 0) {
-                gamesList.innerHTML = "<p>No games found!</p>";
-            } else {
-                data.forEach(game => {
-                    const gameDiv = document.createElement("div");
-                    gameDiv.classList.add("game-item");
-                    gameDiv.innerHTML = `
-                        <h3>${game.name}</h3>
-                        <p>Players: ${game.minPlayers} - ${game.maxPlayers}</p>
-                        <p>Category: ${game.category}</p>
-                        <p>Rating: ${game.rating}</p>
-                        <p>Owner: ${game.owner}</p>
-                        <img src="${game.imageUrl}" alt="${game.name}" style="max-width:150px;">
-                    `;
-                    gamesList.appendChild(gameDiv);
-                });
-            }
-        })
-        .catch(error => {
-            console.error("Error searching games:", error);
-            document.getElementById("games-list").innerHTML = "<p>Error loading games!</p>";
-        });
+// Function to handle the search functionality
+function setupSearch() {
+    const searchInput = document.getElementById("search-input"); // Get the search input field
+
+    // Add an event listener to the search input field to trigger search as the user types
+    searchInput.addEventListener("input", () => {
+        const searchTerm = searchInput.value.toLowerCase(); // Get the search term and convert it to lowercase
+
+        if (searchTerm === "") {
+            // If the search term is empty, display all games
+            displayGames(window.allGames); 
+        } else {
+            // Filter games based on the search term (case-insensitive)
+            const filteredGames = window.allGames.filter((game) =>
+                game.name.toLowerCase().includes(searchTerm) // Check if the game's name includes the search term
+            );
+
+            // Display the filtered games dynamically
+            displayGames(filteredGames);
+        }
+    });
+}
+
+// Function to handle filtering games by category and tag
+function setupFilters() {
+    const categoryFilter = document.getElementById("category-filter");
+    const tagFilter = document.getElementById("tag-filter");
+
+    // Event listener for category filter change
+    categoryFilter.addEventListener("change", () => {
+        applyFilters();
+    });
+
+    // Event listener for tag filter change
+    tagFilter.addEventListener("input", () => {
+        applyFilters();
+    });
+}
+
+// Function to apply the active filters (both category and tag)
+function applyFilters() {
+    const searchTerm = document.getElementById("search-input").value.toLowerCase(); // Get current search term
+    const selectedCategory = document.getElementById("category-filter").value.toLowerCase(); // Get selected category filter
+    const tagTerm = document.getElementById("tag-filter").value.toLowerCase(); // Get entered tag filter
+
+    // Filter the games based on the search term, selected category, and tag
+    const filteredGames = window.allGames.filter((game) => {
+        const matchesSearch = game.name.toLowerCase().includes(searchTerm);
+        const matchesCategory = selectedCategory === "" || game.category.toLowerCase().includes(selectedCategory);
+        const matchesTag = tagTerm === "" || game.tag.toLowerCase().includes(tagTerm);
+
+        return matchesSearch && matchesCategory && matchesTag; // Return games that match all filters
+    });
+
+    // Display the filtered games
+    displayGames(filteredGames);
 }
