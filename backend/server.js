@@ -14,22 +14,23 @@ const port = process.env.PORT || 3000; // Port for server, default to 3000 for l
 
 // CORS setup - safely allow only specific domains
 const allowedOrigins = [
-    "https://thijssenware.github.io",               // GitHub Pages root URL
-    "https://thijssenware.github.io/MyBoardGames",   // GitHub Pages subdirectory URL
-    "http://localhost:5500",                         // Local testing URL (if using VS Code Live Server or another local server)
-  ];
-  
-  app.use(cors({
-    origin: function (origin, callback) {
-      // If there's no origin (i.e. request from Postman or cURL), allow it
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        return callback(null, true); // Allow the request
-      }
-      return callback(new Error('Not allowed by CORS')); // Reject the request
-    },
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allow these methods
-  }));
+  "https://thijssenware.github.io",                // GitHub Pages base URL (use this if it's deployed at the root)
+  "https://thijssenware.github.io/MyBoardGames",    // GitHub Pages URL for your specific project folder
+  "http://localhost:5500",                          // Local testing URL (if using VS Code Live Server or another local server)
+  "https://myboardgames-backend.onrender.com",      // Render Backend URL (if you need it for testing from the backend itself)
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // If there's no origin (i.e. request from Postman or cURL), allow it
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true); // Allow the request
+    }
+    return callback(new Error('Not allowed by CORS')); // Reject the request
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"], // Allow these methods
+}));
 
 // Middleware to parse JSON bodies
 app.use(express.json());

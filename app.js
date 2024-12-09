@@ -1,5 +1,6 @@
 // Replace with your Render backend URL
-const backendUrl = "https://myboardgames-backend.onrender.com/api/games"; // Ensure "https" is correct here
+const backendUrl = "https://myboardgames-backend.onrender.com"; // This should be your backend url
+
 
 // Wait for the DOM to fully load before executing any JavaScript
 document.addEventListener("DOMContentLoaded", () => {
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Function to fetch and display all games from the backend API
 function fetchGames() {
-    fetch(`${backendUrl}/api/games}`) // Make a GET request to fetch all games
+    fetch(`${backendUrl}/api/games`) // This is now correct
         .then((response) => response.json()) // Convert the response into JSON format
         .then((data) => {
             const gamesList = document.getElementById("games-list");
@@ -40,6 +41,8 @@ function fetchGames() {
             document.getElementById("games-list").innerHTML = "<p>Error loading games!</p>";
         });
 }
+
+
 
 // Function to display games (used for both initial load and filtered search)
 function displayGames(games) {
