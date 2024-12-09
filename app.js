@@ -1,5 +1,5 @@
 // Replace with your Render backend URL
-const backendUrl = "https://myboardgames-backend.onrender.com"; // Ensure "https" is correct here
+const backendUrl = "https://myboardgames-backend.onrender.com/api/games"; // Ensure "https" is correct here
 
 // Wait for the DOM to fully load before executing any JavaScript
 document.addEventListener("DOMContentLoaded", () => {
