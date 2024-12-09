@@ -18,6 +18,7 @@ const allowedOrigins = [
   "https://thijssenware.github.io/MyBoardGames",    // GitHub Pages URL for your specific project folder
   "http://localhost:5500",                          // Local testing URL (if using VS Code Live Server or another local server)
   "https://myboardgames-backend.onrender.com",      // Render Backend URL (if you need it for testing from the backend itself)
+  "null",
 ];
 
 app.use(cors({
