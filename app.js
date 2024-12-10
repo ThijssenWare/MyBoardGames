@@ -55,9 +55,10 @@ function fetchCategories() {
     fetch(`${backendUrl}/api/categories`)
         .then(response => response.json())
         .then(categories => {
-            populateCategoryDropdown("category", categories);
-            populateCategoryDropdown("edit-category", categories);
-            populateCategoryDropdown("category-filter", categories, true);
+            // Populate all category dropdowns
+            populateCategoryDropdown("category", categories, false); // Add Game form
+            populateCategoryDropdown("edit-category", categories, false); // Edit Game form
+            populateCategoryDropdown("category-filter", categories, true); // Category filter
         })
         .catch(error => console.error("Error fetching categories:", error));
 }
@@ -73,6 +74,11 @@ function populateCategoryDropdown(dropdownId, categories, isFilter = false) {
         option.textContent = category.name;
         dropdown.appendChild(option);
     });
+
+    // Make the "Add Game" form category dropdown a multiple select dropdown
+    if (dropdownId === "category" || dropdownId === "edit-category") {
+        dropdown.setAttribute("multiple", "multiple"); // Allow multi-selection
+    }
 }
 
 // Add Game form toggle

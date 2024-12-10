@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Board Games</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to styles.css -->
     <style>
         label {
             font-weight: bold;
@@ -16,22 +17,28 @@
     </style>
 </head>
 <body>
-    <h1>My Board Games</h1>
+    <header>
+        <h1>My Board Games</h1>
+    </header>
 
     <!-- Search functionality -->
-    <label for="search-input">Search Games:</label>
-    <input type="text" id="search-input" placeholder="Search games...">
+    <div class="search">
+        <label for="search-input">Search Games:</label>
+        <input type="text" id="search-input" placeholder="Search games...">
+    </div>
 
     <!-- Filter options -->
-    <label for="category-filter">Filter by Category:</label>
-    <select id="category-filter" multiple></select>
+    <div class="filters">
+        <label for="category-filter">Filter by Category:</label>
+        <select id="category-filter" multiple></select>
 
-    <label for="tag-filter">Filter by Tag:</label>
-    <select id="tag-filter">
-        <option value="">All Tags</option>
-        <option value="cooperative">Cooperative</option>
-        <option value="competitive">Competitive</option>
-    </select>
+        <label for="tag-filter">Filter by Tag:</label>
+        <select id="tag-filter">
+            <option value="">All Tags</option>
+            <option value="cooperative">Cooperative</option>
+            <option value="competitive">Competitive</option>
+        </select>
+    </div>
 
     <!-- Add Game Form Toggle -->
     <button id="toggle-add-game">Add a New Game</button>
