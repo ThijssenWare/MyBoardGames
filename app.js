@@ -1,207 +1,169 @@
 // Replace with your Render backend URL
-const backendUrl = "https://myboardgames-backend.onrender.com"; // This should be your backend URL
+const backendUrl = "https://myboardgames-backend.onrender.com";
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetchCategories();
+// Global variable to store all games
+window.allGames = [];
+
+// Wait for DOM to fully load
+document.addEventListener("DOMContentLoaded", () => {
     fetchGames();
-    setupTestingForm();
+    fetchCategories();
     setupSearch();
-    setupFilters();
 });
 
-// Fetch and display games
+// Fetch and display all games
 function fetchGames() {
     fetch(`${backendUrl}/api/games`)
-        .then((response) => response.json())
-        .then((data) => {
-            const gamesList = document.getElementById('games-list');
-            gamesList.innerHTML = '';
-
-            if (data.length === 0) {
-                gamesList.innerHTML = '<p>No games found!</p>';
-            } else {
-                window.allGames = data; // Cache games in the window object
-                displayGames(data);
-            }
+        .then(response => response.json())
+        .then(data => {
+            window.allGames = data; // Store games globally
+            displayGames(data);
         })
-        .catch((error) => {
-            console.error('Error fetching games:', error);
-            document.getElementById('games-list').innerHTML = '<p>Error loading games!</p>';
-        });
+        .catch(error => console.error('Error fetching games:', error));
 }
 
-// Display games and add Edit/Delete buttons
-function displayGames(games) {
-    const gamesList = document.getElementById('games-list');
-    gamesList.innerHTML = '';
+// Fetch and populate categories
+function fetchCategories() {
+    fetch(`${backendUrl}/api/categories`)
+        .then(response => response.json())
+        .then(categories => {
+            const categoryDropdown = document.getElementById("category");
+            const editCategoryDropdown = document.getElementById("edit-category");
 
-    games.forEach((game) => {
-        const gameDiv = document.createElement('div');
+            categories.forEach(category => {
+                const option = document.createElement("option");
+                option.value = category.id;
+                option.textContent = category.name;
+
+                // Add option to both add and edit dropdowns
+                categoryDropdown.appendChild(option.cloneNode(true));
+                editCategoryDropdown.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Error fetching categories:", error));
+}
+
+// Display games in the list
+function displayGames(games) {
+    const gamesList = document.getElementById("games-list");
+    gamesList.innerHTML = ""; // Clear list
+
+    games.forEach(game => {
+        const gameDiv = document.createElement("div");
+
         gameDiv.innerHTML = `
-            <h2>${game.name}</h2>
-            <p>Players: ${game.minplayers || 'N/A'} - ${game.maxplayers || 'N/A'}</p>
-            <p>Categories: ${game.categories.join(', ')}</p>
-            <p>Tag: ${game.tag || 'N/A'}</p>
-            <p>Rating: ${game.rating || 'N/A'}</p>
-            <p>Owner: ${game.owner}</p>
-            <img src="${game.imageurl}" alt="${game.name}" style="max-width:150px;">
-            <button class="edit-btn" data-id="${game.id}">Edit</button>
-            <button class="delete-btn" data-id="${game.id}">Delete</button>
+            <h3>${game.name}</h3>
+            <p>Players: ${game.minplayers} - ${game.maxplayers}</p>
+            <p>Category: ${game.categories.join(", ")}</p>
+            <p>Tag: ${game.tag}</p>
+            <p>Rating: ${game.rating}</p>
+            <button class="edit-game" data-id="${game.id}">Edit</button>
+            <button class="delete-game" data-id="${game.id}">Delete</button>
         `;
+
+        // Append to list
         gamesList.appendChild(gameDiv);
     });
 
-    // Attach Edit/Delete event listeners
-    document.querySelectorAll('.edit-btn').forEach((button) => {
-        button.addEventListener('click', () => handleEditGame(button.dataset.id));
+    // Attach edit and delete handlers
+    document.querySelectorAll(".edit-game").forEach(button => {
+        button.addEventListener("click", () => openEditModal(button.dataset.id));
     });
 
-    document.querySelectorAll('.delete-btn').forEach((button) => {
-        button.addEventListener('click', () => handleDeleteGame(button.dataset.id));
-    });
-}
-
-// Fetch categories and populate the form and filters
-function fetchCategories() {
-    fetch(`${backendUrl}/api/categories`)
-        .then((response) => response.json())
-        .then((categories) => {
-            const categorySelect = document.getElementById('category');
-            const filterSelect = document.getElementById('category-filter');
-            categories.forEach((category) => {
-                const option = document.createElement('option');
-                option.value = category.name; // Assuming the backend expects `category.name`
-                option.textContent = category.name;
-                categorySelect.appendChild(option);
-
-                const filterOption = option.cloneNode(true);
-                filterSelect.appendChild(filterOption);
-            });
-        })
-        .catch((error) => console.error('Error fetching categories:', error));
-}
-
-// Handle adding or updating a game
-function setupTestingForm() {
-    const form = document.getElementById("add-game-form");
-    if (!form) return;
-
-    form.addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        const gameId = form.dataset.id; // If editing, this will have a value
-        const method = gameId ? "PUT" : "POST";
-        const url = gameId ? `${backendUrl}/api/games/${gameId}` : `${backendUrl}/api/games`;
-
-        const gameData = {
-            name: document.getElementById("name").value,
-            minPlayers: document.getElementById("minPlayers").value,
-            maxPlayers: document.getElementById("maxPlayers").value,
-            category: document.getElementById("category").value,
-            language: document.getElementById("language").value,
-            rating: document.getElementById("rating").value,
-            lastPlayed: document.getElementById("lastPlayed").value,
-            owner: document.getElementById("owner").value,
-            BGGUrl: document.getElementById("bggUrl").value,
-            tag: document.getElementById("tag").value,
-            imageUrl: document.getElementById("imageUrl").value,
-        };
-
-        fetch(url, {
-            method: method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(gameData),
-        })
-            .then((response) => {
-                if (!response.ok) throw new Error("Failed to save game");
-                return response.json();
-            })
-            .then(() => {
-                alert(gameId ? "Game updated successfully!" : "Game added successfully!");
-                form.reset();
-                delete form.dataset.id; // Clear form state
-                fetchGames();
-            })
-            .catch((error) => {
-                console.error("Error saving game:", error);
-                alert("Error saving game");
-            });
+    document.querySelectorAll(".delete-game").forEach(button => {
+        button.addEventListener("click", () => deleteGame(button.dataset.id));
     });
 }
 
-// Handle editing a game
-function handleEditGame(gameId) {
-    const game = window.allGames.find((g) => g.id === gameId);
+// Open the edit modal and populate fields
+function openEditModal(gameId) {
+    const game = window.allGames.find(g => g.id == gameId);
     if (!game) return;
 
-    const form = document.getElementById("add-game-form");
-    form.dataset.id = gameId;
+    // Populate fields
+    document.getElementById("edit-name").value = game.name;
+    document.getElementById("edit-minPlayers").value = game.minplayers;
+    document.getElementById("edit-maxPlayers").value = game.maxplayers;
+    document.getElementById("edit-category").value = game.category;
+    document.getElementById("edit-language").value = game.language;
+    document.getElementById("edit-rating").value = game.rating;
+    document.getElementById("edit-lastPlayed").value = game.lastplayed;
+    document.getElementById("edit-owner").value = game.owner;
+    document.getElementById("edit-tag").value = game.tag;
+    document.getElementById("edit-imageUrl").value = game.imageurl;
 
-    document.getElementById("name").value = game.name;
-    document.getElementById("minPlayers").value = game.minplayers;
-    document.getElementById("maxPlayers").value = game.maxplayers;
-    document.getElementById("category").value = game.category;
-    document.getElementById("language").value = game.language;
-    document.getElementById("rating").value = game.rating;
-    document.getElementById("lastPlayed").value = game.lastplayed;
-    document.getElementById("owner").value = game.owner;
-    document.getElementById("bggUrl").value = game.bggurl;
-    document.getElementById("tag").value = game.tag;
-    document.getElementById("imageUrl").value = game.imageurl;
+    // Save changes on form submit
+    document.getElementById("edit-game-form").onsubmit = event => {
+        event.preventDefault();
+        saveGameChanges(gameId);
+    };
+
+    // Show modal
+    document.getElementById("edit-modal").style.display = "block";
 }
 
-// Handle deleting a game
-function handleDeleteGame(gameId) {
+// Save changes to game
+function saveGameChanges(gameId) {
+    const updatedGame = {
+        name: document.getElementById("edit-name").value,
+        minplayers: document.getElementById("edit-minPlayers").value,
+        maxplayers: document.getElementById("edit-maxPlayers").value,
+        category: document.getElementById("edit-category").value,
+        language: document.getElementById("edit-language").value,
+        rating: document.getElementById("edit-rating").value,
+        lastplayed: document.getElementById("edit-lastPlayed").value,
+        owner: document.getElementById("edit-owner").value,
+        tag: document.getElementById("edit-tag").value,
+        imageurl: document.getElementById("edit-imageUrl").value
+    };
+
+    fetch(`${backendUrl}/api/games/${gameId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedGame)
+    })
+        .then(response => {
+            if (!response.ok) throw new Error("Failed to update game");
+            return response.json();
+        })
+        .then(() => {
+            alert("Game updated successfully!");
+            fetchGames(); // Refresh list
+            closeEditModal();
+        })
+        .catch(error => console.error("Error updating game:", error));
+}
+
+// Delete a game
+function deleteGame(gameId) {
     if (!confirm("Are you sure you want to delete this game?")) return;
 
     fetch(`${backendUrl}/api/games/${gameId}`, { method: "DELETE" })
-        .then((response) => {
+        .then(response => {
             if (!response.ok) throw new Error("Failed to delete game");
-            fetchGames();
+            alert("Game deleted successfully!");
+            fetchGames(); // Refresh list
         })
-        .catch((error) => {
-            console.error("Error deleting game:", error);
-            alert("Error deleting game");
-        });
+        .catch(error => console.error("Error deleting game:", error));
 }
 
-// Add dropdown options for predefined tags
-function setupTagDropdown() {
-    const tags = ["Cooperative", "Competitive", "Solo", "Party"];
-    const tagSelect = document.getElementById("tag");
-    tags.forEach((tag) => {
-        const option = document.createElement("option");
-        option.value = tag.toLowerCase();
-        option.textContent = tag;
-        tagSelect.appendChild(option);
-    });
+// Close the edit modal
+function closeEditModal() {
+    document.getElementById("edit-modal").style.display = "none";
 }
 
-// Add event listener to the search input field
+// Setup search functionality
 function setupSearch() {
     const searchInput = document.getElementById("search-input");
-
     searchInput.addEventListener("input", () => {
         const searchTerm = searchInput.value.toLowerCase();
 
-        if (searchTerm === "") {
-            // If search input is empty, display all games
-            displayGames(window.allGames);
-        } else {
-            // Filter games by name, category, or tag
-            const filteredGames = window.allGames.filter((game) => {
-                return (
-                    game.name.toLowerCase().includes(searchTerm) ||
-                    game.categories.some((category) =>
-                        category.toLowerCase().includes(searchTerm)
-                    ) ||
-                    (game.tag && game.tag.toLowerCase().includes(searchTerm))
-                );
-            });
+        const filteredGames = window.allGames.filter(game =>
+            game.name.toLowerCase().includes(searchTerm) ||
+            game.categories.some(cat => cat.toLowerCase().includes(searchTerm)) ||
+            game.tag.toLowerCase().includes(searchTerm)
+        );
 
-            displayGames(filteredGames);
-        }
+        displayGames(filteredGames);
     });
 }
-
-
