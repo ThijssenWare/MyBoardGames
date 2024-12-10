@@ -4,44 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Board Games</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #games-list div {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #games-list img {
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>My Board Games</h1>
 
-<!-- Filter by category -->
-<label for="category-filter">Filter by Category: </label>
-<select id="category-filter">
-    <option value="">All Categories</option>
-    <!-- Add options dynamically based on categories -->
-</select>
-<hr>
+    <!-- Filter by category -->
+    <label for="category-filter">Filter by Category: </label>
+    <select id="category-filter">
+        <option value="">All Categories</option>
+        <!-- Options will be populated dynamically -->
+    </select>
+    <hr>
 
-<!-- Filter by tag -->
-<label for="tag-filter">Filter by Tag: </label>
-<input type="text" id="tag-filter" placeholder="Enter tag...">
-<hr>
+    <!-- Filter by tag -->
+    <label for="tag-filter">Filter by Tag: </label>
+    <input type="text" id="tag-filter" placeholder="Enter tag...">
+    <hr>
 
-<!-- Search functionality -->
-<label for="search-input">Search: </label>
-<input type="text" id="search-input" placeholder="Search for games...">
-<hr>
-
+    <!-- Search functionality -->
+    <label for="search-input">Search: </label>
+    <input type="text" id="search-input" placeholder="Search for games...">
+    <hr>
 
     <!-- Form to add a new game -->
     <div id="testing-bit">
         <h2>Testing: Add a New Game</h2>
         <form id="add-game-form">
-            <label>Name: <input type="text" id="name" required></label><br>
-            <label>Min Players: <input type="number" id="minPlayers" required></label><br>
-            <label>Max Players: <input type="number" id="maxPlayers" required></label><br>
-            <label>Category: <input type="text" id="category"></label><br>
-            <label>Language: <input type="text" id="language"></label><br>
-            <label>Rating: <input type="number" step="0.1" id="rating"></label><br>
-            <label>Last Played: <input type="date" id="lastPlayed"></label><br>
-            <label>Owner: <input type="text" id="owner"></label><br>
-            <label>BGG URL: <input type="url" id="bggUrl"></label><br>
-            <label>Tag: <input type="text" id="tag"></label><br>
-            <label>Image URL: <input type="url" id="imageUrl"></label><br>
+            <label for="name">Name: <input type="text" id="name" required></label><br>
+            <label for="minPlayers">Min Players: <input type="number" id="minPlayers" required></label><br>
+            <label for="maxPlayers">Max Players: <input type="number" id="maxPlayers" required></label><br>
+            <label for="category">Category: 
+                <select id="category" required>
+                    <option value="">Select a Category</option>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </label><br>
+            <label for="language">Language: <input type="text" id="language"></label><br>
+            <label for="rating">Rating: <input type="number" step="0.1" id="rating"></label><br>
+            <label for="lastPlayed">Last Played: <input type="date" id="lastPlayed"></label><br>
+            <label for="owner">Owner: <input type="text" id="owner"></label><br>
+            <label for="bggUrl">BGG URL: <input type="url" id="bggUrl"></label><br>
+            <label for="tag">Tag: <input type="text" id="tag"></label><br>
+            <label for="imageUrl">Image URL: <input type="url" id="imageUrl"></label><br>
             <button type="submit">Add Game</button>
         </form>
         <hr>

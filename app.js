@@ -2,6 +2,11 @@
 const backendUrl = "https://myboardgames-backend.onrender.com"; // This should be your backend url
 
 
+// Call fetchCategories when the DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+    fetchCategories();
+  });
+
 // Wait for the DOM to fully load before executing any JavaScript
 document.addEventListener("DOMContentLoaded", () => {
     // Initially fetch and display games when the page loads
@@ -19,50 +24,62 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Function to fetch and display all games from the backend API
 function fetchGames() {
-    fetch(`${backendUrl}/api/games`) // This is now correct
-        .then((response) => response.json()) // Convert the response into JSON format
-        .then((data) => {
-            const gamesList = document.getElementById("games-list");
-            gamesList.innerHTML = ""; // Clear previous content in the list
-
-            // If no games are found, display a message
-            if (data.length === 0) {
-                gamesList.innerHTML = "<p>No games found!</p>";
-            } else {
-                // Store games in a global variable for easy access during searching and filtering
-                window.allGames = data; 
-
-                // Display all games initially
-                displayGames(data);
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching games:", error); // If there's an error, log it
-            document.getElementById("games-list").innerHTML = "<p>Error loading games!</p>";
-        });
-}
+    fetch(`${backendUrl}/api/games`)
+      .then((response) => response.json())
+      .then((data) => {
+        const gamesList = document.getElementById('games-list');
+        gamesList.innerHTML = '';
+  
+        if (data.length === 0) {
+          gamesList.innerHTML = '<p>No games found!</p>';
+        } else {
+          window.allGames = data;
+          displayGames(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching games:', error);
+        document.getElementById('games-list').innerHTML = '<p>Error loading games!</p>';
+      });
+  }
 
 
 
 // Function to display games (used for both initial load and filtered search)
 function displayGames(games) {
-    const gamesList = document.getElementById("games-list");
-    gamesList.innerHTML = ""; // Clear the current list of games
-
-    // Loop through each game and create an HTML structure for each one
+    const gamesList = document.getElementById('games-list');
+    gamesList.innerHTML = '';
+  
     games.forEach((game) => {
-        const gameDiv = document.createElement("div");
-        gameDiv.innerHTML = `
-            <h2>${game.name}</h2>
-            <p>Players: ${game.minplayers || 'N/A'} - ${game.maxplayers || 'N/A'}</p>
-            <p>Category: ${game.category}</p>
-            <p>Rating: ${game.rating || "N/A"}</p>
-            <p>Owner: ${game.owner}</p>
-            <img src="${game.imageurl}" alt="${game.name}" style="max-width:150px;">
-        `;
-        gamesList.appendChild(gameDiv); // Add the game to the list
+      const gameDiv = document.createElement('div');
+      gameDiv.innerHTML = `
+        <h2>${game.name}</h2>
+        <p>Players: ${game.minplayers || 'N/A'} - ${game.maxplayers || 'N/A'}</p>
+        <p>Categories: ${game.categories.join(', ')}</p>
+        <p>Rating: ${game.rating || 'N/A'}</p>
+        <p>Owner: ${game.owner}</p>
+        <img src="${game.imageurl}" alt="${game.name}" style="max-width:150px;">
+      `;
+      gamesList.appendChild(gameDiv);
     });
-}
+  }
+
+  // Fetch categories for the form dynamically
+function fetchCategories() {
+    fetch(`${backendUrl}/api/categories`)
+      .then((response) => response.json())
+      .then((categories) => {
+        const categorySelect = document.getElementById('category');
+        categories.forEach((category) => {
+          const option = document.createElement('option');
+          option.value = category.id;
+          option.textContent = category.name;
+          categorySelect.appendChild(option);
+        });
+      })
+      .catch((error) => console.error('Error fetching categories:', error));
+  }
+
 
 // Function to handle adding a new game
 function setupTestingForm() {
