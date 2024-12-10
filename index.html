@@ -5,206 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Board Games</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #games-list div {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
         label {
-            display: block;
             font-weight: bold;
-        }
-        input, select, button {
-            width: 100%;
-            padding: 8px;
+            display: block;
             margin: 5px 0;
         }
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
+        form, select, input, button {
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
     <h1>My Board Games</h1>
 
-    <!-- Search and Filters -->
-    <div>
-        <h2>Search & Filters</h2>
-        <input type="text" id="search-input" placeholder="Search games by name, category, or tag">
+    <!-- Search functionality -->
+    <label for="search-input">Search Games:</label>
+    <input type="text" id="search-input" placeholder="Search games...">
 
-        <div class="multi-select" id="category-select">
-            <div class="multi-select-header">
-              <span class="multi-select-header-placeholder">Select categories</span>
-            </div>
-            <div class="multi-select-options"></div>
-          </div>
-          
+    <!-- Filter options -->
+    <label for="category-filter">Filter by Category:</label>
+    <select id="category-filter" multiple></select>
 
-        <select id="tag-filter">
-            <option value="">Filter by Tag</option>
-            <option value="cooperative">Cooperative</option>
-            <option value="competitive">Competitive</option>
-            <option value="strategy">Strategy</option>
-            <option value="party">Party</option>
-        </select>
-    </div>
+    <label for="tag-filter">Filter by Tag:</label>
+    <select id="tag-filter">
+        <option value="">All Tags</option>
+        <option value="cooperative">Cooperative</option>
+        <option value="competitive">Competitive</option>
+    </select>
+
+    <!-- Add Game Form Toggle -->
+    <button id="toggle-add-game">Add a New Game</button>
 
     <!-- Add Game Form -->
-    <div>
-        <h2>Add a New Game</h2>
-        <form id="add-game-form">
-            <div class="form-group">
-                <label for="name">Game Name:</label>
-                <input type="text" id="name" required>
-            </div>
+    <form id="add-game-form" style="display: none;">
+        <label for="name">Game Name:</label>
+        <input type="text" id="name" placeholder="Name" required>
 
-            <div class="form-group">
-                <label for="minPlayers">Minimum Players:</label>
-                <input type="number" id="minPlayers" required>
-            </div>
+        <label for="minPlayers">Minimum Players:</label>
+        <input type="number" id="minPlayers" required>
 
-            <div class="form-group">
-                <label for="maxPlayers">Maximum Players:</label>
-                <input type="number" id="maxPlayers" required>
-            </div>
+        <label for="maxPlayers">Maximum Players:</label>
+        <input type="number" id="maxPlayers" required>
 
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <select id="category">
-                    <option value="">Select Category</option>
-                </select>
-            </div>
+        <label for="category">Categories:</label>
+        <select id="category" multiple></select>
 
-            <div class="form-group">
-                <label for="language">Language:</label>
-                <input type="text" id="language">
-            </div>
+        <label for="tag">Tag:</label>
+        <select id="tag">
+            <option value="cooperative">Cooperative</option>
+            <option value="competitive">Competitive</option>
+        </select>
 
-            <div class="form-group">
-                <label for="rating">Rating:</label>
-                <input type="number" id="rating" step="0.1" min="0" max="10">
-            </div>
+        <label for="owner">Owner:</label>
+        <input type="text" id="owner" required>
 
-            <div class="form-group">
-                <label for="lastPlayed">Last Played:</label>
-                <input type="date" id="lastPlayed">
-            </div>
+        <label for="imageUrl">Image URL:</label>
+        <input type="text" id="imageUrl" required>
 
-            <div class="form-group">
-                <label for="owner">Owner:</label>
-                <input type="text" id="owner">
-            </div>
-
-            <div class="form-group">
-                <label for="bggUrl">BGG URL:</label>
-                <input type="url" id="bggUrl">
-            </div>
-
-            <div class="form-group">
-                <label for="tag">Tag:</label>
-                <select id="tag">
-                    <option value="">Select Tag</option>
-                    <option value="cooperative">Cooperative</option>
-                    <option value="competitive">Competitive</option>
-                    <option value="strategy">Strategy</option>
-                    <option value="party">Party</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="imageUrl">Image URL:</label>
-                <input type="url" id="imageUrl">
-            </div>
-
-            <button type="submit">Add Game</button>
-        </form>
-    </div>
+        <button type="submit">Add Game</button>
+    </form>
 
     <!-- Games List -->
-    <div>
-        <h2>Games</h2>
-        <div id="games-list"></div>
-    </div>
-
-    <!-- Edit Game Modal (hidden initially) -->
-    <div id="edit-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; border:1px solid #ccc; padding:20px; z-index:1000;">
-        <h2>Edit Game</h2>
-        <form id="edit-game-form">
-            <div class="form-group">
-                <label for="edit-name">Game Name:</label>
-                <input type="text" id="edit-name" required>
-            </div>
-
-            <div class="form-group">
-                <label for="edit-minPlayers">Minimum Players:</label>
-                <input type="number" id="edit-minPlayers" required>
-            </div>
-
-            <div class="form-group">
-                <label for="edit-maxPlayers">Maximum Players:</label>
-                <input type="number" id="edit-maxPlayers" required>
-            </div>
-
-            <div class="form-group">
-                <label for="edit-category">Category:</label>
-                <select id="edit-category">
-                    <option value="">Select Category</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="edit-language">Language:</label>
-                <input type="text" id="edit-language">
-            </div>
-
-            <div class="form-group">
-                <label for="edit-rating">Rating:</label>
-                <input type="number" id="edit-rating" step="0.1" min="0" max="10">
-            </div>
-
-            <div class="form-group">
-                <label for="edit-lastPlayed">Last Played:</label>
-                <input type="date" id="edit-lastPlayed">
-            </div>
-
-            <div class="form-group">
-                <label for="edit-owner">Owner:</label>
-                <input type="text" id="edit-owner">
-            </div>
-
-            <div class="form-group">
-                <label for="edit-tag">Tag:</label>
-                <select id="edit-tag">
-                    <option value="">Select Tag</option>
-                    <option value="cooperative">Cooperative</option>
-                    <option value="competitive">Competitive</option>
-                    <option value="strategy">Strategy</option>
-                    <option value="party">Party</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="edit-imageUrl">Image URL:</label>
-                <input type="url" id="edit-imageUrl">
-            </div>
-
-            <button type="submit">Save Changes</button>
-            <button type="button" id="cancel-edit">Cancel</button>
-        </form>
-    </div>
+    <div id="games-list"></div>
 
     <script src="app.js"></script>
 </body>
