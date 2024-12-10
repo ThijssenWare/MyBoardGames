@@ -24,3 +24,37 @@ footer {
     bottom: 0;
     width: 100%;
 }
+
+.multi-select {
+    position: relative;
+    width: 100%;
+    user-select: none;
+  }
+  .multi-select-header {
+    border: 1px solid #dee2e6;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  .multi-select-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+  .multi-select-option {
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  .multi-select-option:hover {
+    background-color: #f1f1f1;
+  }
+  .multi-select-checkbox {
+    margin-right: 10px;
+  }
+  

@@ -22,26 +22,46 @@ function fetchGames() {
         .catch(error => console.error('Error fetching games:', error));
 }
 
-// Fetch and populate categories
+// Function to fetch and display categories in the multi-select dropdown
 function fetchCategories() {
     fetch(`${backendUrl}/api/categories`)
-        .then(response => response.json())
-        .then(categories => {
-            const categoryDropdown = document.getElementById("category");
-            const editCategoryDropdown = document.getElementById("edit-category");
-
-            categories.forEach(category => {
-                const option = document.createElement("option");
-                option.value = category.id;
-                option.textContent = category.name;
-
-                // Add option to both add and edit dropdowns
-                categoryDropdown.appendChild(option.cloneNode(true));
-                editCategoryDropdown.appendChild(option);
-            });
-        })
-        .catch(error => console.error("Error fetching categories:", error));
-}
+      .then((response) => response.json())
+      .then((categories) => {
+        const categorySelect = document.getElementById('category-select');
+        const optionsContainer = categorySelect.querySelector('.multi-select-options');
+        optionsContainer.innerHTML = '';
+  
+        categories.forEach((category) => {
+          const optionDiv = document.createElement('div');
+          optionDiv.classList.add('multi-select-option');
+          optionDiv.innerHTML = `
+            <input type="checkbox" class="multi-select-checkbox" value="${category.id}" id="cat-${category.id}">
+            <label for="cat-${category.id}">${category.name}</label>
+          `;
+          optionsContainer.appendChild(optionDiv);
+        });
+  
+        // Toggle dropdown visibility
+        const header = categorySelect.querySelector('.multi-select-header');
+        header.addEventListener('click', () => {
+          optionsContainer.style.display = optionsContainer.style.display === 'none' ? 'block' : 'none';
+        });
+  
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+          if (!categorySelect.contains(event.target)) {
+            optionsContainer.style.display = 'none';
+          }
+        });
+      })
+      .catch((error) => console.error('Error fetching categories:', error));
+  }
+  
+  // Call fetchCategories when the DOM loads
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchCategories();
+  });
+  
 
 // Display games in the list
 function displayGames(games) {
@@ -134,18 +154,43 @@ function saveGameChanges(gameId) {
         .catch(error => console.error("Error updating game:", error));
 }
 
-// Delete a game
+// Function to delete a game
 function deleteGame(gameId) {
-    if (!confirm("Are you sure you want to delete this game?")) return;
-
-    fetch(`${backendUrl}/api/games/${gameId}`, { method: "DELETE" })
-        .then(response => {
-            if (!response.ok) throw new Error("Failed to delete game");
-            alert("Game deleted successfully!");
-            fetchGames(); // Refresh list
-        })
-        .catch(error => console.error("Error deleting game:", error));
-}
+    fetch(`${backendUrl}/api/games/${gameId}`, {
+      method: 'DELETE',
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error('Failed to delete game');
+        alert('Game deleted successfully!');
+        fetchGames(); // Refresh the game list
+      })
+      .catch((error) => {
+        console.error('Error deleting game:', error);
+        alert('Error deleting game');
+      });
+  }
+  
+  // Add delete button to each game in displayGames function
+  function displayGames(games) {
+    const gamesList = document.getElementById('games-list');
+    gamesList.innerHTML = '';
+  
+    games.forEach((game) => {
+      const gameDiv = document.createElement('div');
+      gameDiv.innerHTML = `
+        <h2>${game.name}</h2>
+        <p>Players: ${game.minPlayers || 'N/A'} - ${game.maxPlayers || 'N/A'}</p>
+        <p>Categories: ${game.categories.join(', ')}</p>
+        <p>Rating: ${game.rating || 'N/A'}</p>
+        <p>Owner: ${game.owner}</p>
+        <img src="${game.imageUrl}" alt="${game.name}" style="max-width:150px;">
+        <button onclick="editGame('${game.id}')">Edit</button>
+        <button onclick="deleteGame('${game.id}')">Delete</button>
+      `;
+      gamesList.appendChild(gameDiv);
+    });
+  }
+  
 
 // Close the edit modal
 function closeEditModal() {
