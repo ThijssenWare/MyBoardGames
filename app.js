@@ -1,95 +1,98 @@
 // Replace with your Render backend URL
-const backendUrl = "https://myboardgames-backend.onrender.com"; // This should be your backend url
+const backendUrl = "https://myboardgames-backend.onrender.com"; // This should be your backend URL
 
-
-// Call fetchCategories when the DOM loads
 document.addEventListener('DOMContentLoaded', () => {
     fetchCategories();
-  });
-
-// Wait for the DOM to fully load before executing any JavaScript
-document.addEventListener("DOMContentLoaded", () => {
-    // Initially fetch and display games when the page loads
     fetchGames();
-    
-    // Setup the form for adding a new game
     setupTestingForm();
-
-    // Setup the search functionality
     setupSearch();
-
-    // Setup the filter functionality
     setupFilters();
 });
 
-// Function to fetch and display all games from the backend API
+// Fetch and display games
 function fetchGames() {
     fetch(`${backendUrl}/api/games`)
-      .then((response) => response.json())
-      .then((data) => {
-        const gamesList = document.getElementById('games-list');
-        gamesList.innerHTML = '';
-  
-        if (data.length === 0) {
-          gamesList.innerHTML = '<p>No games found!</p>';
-        } else {
-          window.allGames = data;
-          displayGames(data);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching games:', error);
-        document.getElementById('games-list').innerHTML = '<p>Error loading games!</p>';
-      });
-  }
+        .then((response) => response.json())
+        .then((data) => {
+            const gamesList = document.getElementById('games-list');
+            gamesList.innerHTML = '';
 
+            if (data.length === 0) {
+                gamesList.innerHTML = '<p>No games found!</p>';
+            } else {
+                window.allGames = data; // Cache games in the window object
+                displayGames(data);
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching games:', error);
+            document.getElementById('games-list').innerHTML = '<p>Error loading games!</p>';
+        });
+}
 
-
-// Function to display games (used for both initial load and filtered search)
+// Display games and add Edit/Delete buttons
 function displayGames(games) {
     const gamesList = document.getElementById('games-list');
     gamesList.innerHTML = '';
-  
-    games.forEach((game) => {
-      const gameDiv = document.createElement('div');
-      gameDiv.innerHTML = `
-        <h2>${game.name}</h2>
-        <p>Players: ${game.minplayers || 'N/A'} - ${game.maxplayers || 'N/A'}</p>
-        <p>Categories: ${game.categories.join(', ')}</p>
-        <p>Rating: ${game.rating || 'N/A'}</p>
-        <p>Owner: ${game.owner}</p>
-        <img src="${game.imageurl}" alt="${game.name}" style="max-width:150px;">
-      `;
-      gamesList.appendChild(gameDiv);
-    });
-  }
 
-  // Fetch categories for the form dynamically
+    games.forEach((game) => {
+        const gameDiv = document.createElement('div');
+        gameDiv.innerHTML = `
+            <h2>${game.name}</h2>
+            <p>Players: ${game.minplayers || 'N/A'} - ${game.maxplayers || 'N/A'}</p>
+            <p>Categories: ${game.categories.join(', ')}</p>
+            <p>Tag: ${game.tag || 'N/A'}</p>
+            <p>Rating: ${game.rating || 'N/A'}</p>
+            <p>Owner: ${game.owner}</p>
+            <img src="${game.imageurl}" alt="${game.name}" style="max-width:150px;">
+            <button class="edit-btn" data-id="${game.id}">Edit</button>
+            <button class="delete-btn" data-id="${game.id}">Delete</button>
+        `;
+        gamesList.appendChild(gameDiv);
+    });
+
+    // Attach Edit/Delete event listeners
+    document.querySelectorAll('.edit-btn').forEach((button) => {
+        button.addEventListener('click', () => handleEditGame(button.dataset.id));
+    });
+
+    document.querySelectorAll('.delete-btn').forEach((button) => {
+        button.addEventListener('click', () => handleDeleteGame(button.dataset.id));
+    });
+}
+
+// Fetch categories and populate the form and filters
 function fetchCategories() {
     fetch(`${backendUrl}/api/categories`)
-      .then((response) => response.json())
-      .then((categories) => {
-        const categorySelect = document.getElementById('category');
-        categories.forEach((category) => {
-          const option = document.createElement('option');
-          option.value = category.id;
-          option.textContent = category.name;
-          categorySelect.appendChild(option);
-        });
-      })
-      .catch((error) => console.error('Error fetching categories:', error));
-  }
+        .then((response) => response.json())
+        .then((categories) => {
+            const categorySelect = document.getElementById('category');
+            const filterSelect = document.getElementById('category-filter');
+            categories.forEach((category) => {
+                const option = document.createElement('option');
+                option.value = category.name; // Assuming the backend expects `category.name`
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
 
+                const filterOption = option.cloneNode(true);
+                filterSelect.appendChild(filterOption);
+            });
+        })
+        .catch((error) => console.error('Error fetching categories:', error));
+}
 
-// Function to handle adding a new game
+// Handle adding or updating a game
 function setupTestingForm() {
     const form = document.getElementById("add-game-form");
-    if (!form) return; // Exit if the form doesn't exist
+    if (!form) return;
 
     form.addEventListener("submit", (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
+        event.preventDefault();
 
-        // Collect data from the form
+        const gameId = form.dataset.id; // If editing, this will have a value
+        const method = gameId ? "PUT" : "POST";
+        const url = gameId ? `${backendUrl}/api/games/${gameId}` : `${backendUrl}/api/games`;
+
         const gameData = {
             name: document.getElementById("name").value,
             minPlayers: document.getElementById("minPlayers").value,
@@ -104,83 +107,101 @@ function setupTestingForm() {
             imageUrl: document.getElementById("imageUrl").value,
         };
 
-        // Send a POST request to the backend to add the new game
-        fetch(`${backendUrl}/api/games`, {
-            method: "POST", // Set the request method to POST
-            headers: {
-                "Content-Type": "application/json", // Set the header to indicate we're sending JSON data
-            },
-            body: JSON.stringify(gameData), // Convert the game data to a JSON string
+        fetch(url, {
+            method: method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(gameData),
         })
             .then((response) => {
-                if (!response.ok) throw new Error("Failed to add game");
-                return response.json(); // If successful, convert the response to JSON
+                if (!response.ok) throw new Error("Failed to save game");
+                return response.json();
             })
-            .then((newGame) => {
-                alert("Game added successfully!"); // Notify the user that the game was added
-                fetchGames(); // Refresh the game list after adding a new game
+            .then(() => {
+                alert(gameId ? "Game updated successfully!" : "Game added successfully!");
+                form.reset();
+                delete form.dataset.id; // Clear form state
+                fetchGames();
             })
             .catch((error) => {
-                console.error("Error adding game:", error); // If there's an error, log it
-                alert("Error adding game"); // Notify the user if there's an error
+                console.error("Error saving game:", error);
+                alert("Error saving game");
             });
     });
 }
 
-// Function to handle the search functionality
-function setupSearch() {
-    const searchInput = document.getElementById("search-input"); // Get the search input field
+// Handle editing a game
+function handleEditGame(gameId) {
+    const game = window.allGames.find((g) => g.id === gameId);
+    if (!game) return;
 
-    // Add an event listener to the search input field to trigger search as the user types
+    const form = document.getElementById("add-game-form");
+    form.dataset.id = gameId;
+
+    document.getElementById("name").value = game.name;
+    document.getElementById("minPlayers").value = game.minplayers;
+    document.getElementById("maxPlayers").value = game.maxplayers;
+    document.getElementById("category").value = game.category;
+    document.getElementById("language").value = game.language;
+    document.getElementById("rating").value = game.rating;
+    document.getElementById("lastPlayed").value = game.lastplayed;
+    document.getElementById("owner").value = game.owner;
+    document.getElementById("bggUrl").value = game.bggurl;
+    document.getElementById("tag").value = game.tag;
+    document.getElementById("imageUrl").value = game.imageurl;
+}
+
+// Handle deleting a game
+function handleDeleteGame(gameId) {
+    if (!confirm("Are you sure you want to delete this game?")) return;
+
+    fetch(`${backendUrl}/api/games/${gameId}`, { method: "DELETE" })
+        .then((response) => {
+            if (!response.ok) throw new Error("Failed to delete game");
+            fetchGames();
+        })
+        .catch((error) => {
+            console.error("Error deleting game:", error);
+            alert("Error deleting game");
+        });
+}
+
+// Add dropdown options for predefined tags
+function setupTagDropdown() {
+    const tags = ["Cooperative", "Competitive", "Solo", "Party"];
+    const tagSelect = document.getElementById("tag");
+    tags.forEach((tag) => {
+        const option = document.createElement("option");
+        option.value = tag.toLowerCase();
+        option.textContent = tag;
+        tagSelect.appendChild(option);
+    });
+}
+
+// Add event listener to the search input field
+function setupSearch() {
+    const searchInput = document.getElementById("search-input");
+
     searchInput.addEventListener("input", () => {
-        const searchTerm = searchInput.value.toLowerCase(); // Get the search term and convert it to lowercase
+        const searchTerm = searchInput.value.toLowerCase();
 
         if (searchTerm === "") {
-            // If the search term is empty, display all games
-            displayGames(window.allGames); 
+            // If search input is empty, display all games
+            displayGames(window.allGames);
         } else {
-            // Filter games based on the search term (case-insensitive)
-            const filteredGames = window.allGames.filter((game) =>
-                game.name.toLowerCase().includes(searchTerm) // Check if the game's name includes the search term
-            );
+            // Filter games by name, category, or tag
+            const filteredGames = window.allGames.filter((game) => {
+                return (
+                    game.name.toLowerCase().includes(searchTerm) ||
+                    game.categories.some((category) =>
+                        category.toLowerCase().includes(searchTerm)
+                    ) ||
+                    (game.tag && game.tag.toLowerCase().includes(searchTerm))
+                );
+            });
 
-            // Display the filtered games dynamically
             displayGames(filteredGames);
         }
     });
 }
 
-// Function to handle filtering games by category and tag
-function setupFilters() {
-    const categoryFilter = document.getElementById("category-filter");
-    const tagFilter = document.getElementById("tag-filter");
 
-    // Event listener for category filter change
-    categoryFilter.addEventListener("change", () => {
-        applyFilters();
-    });
-
-    // Event listener for tag filter change
-    tagFilter.addEventListener("input", () => {
-        applyFilters();
-    });
-}
-
-// Function to apply the active filters (both category and tag)
-function applyFilters() {
-    const searchTerm = document.getElementById("search-input").value.toLowerCase(); // Get current search term
-    const selectedCategory = document.getElementById("category-filter").value.toLowerCase(); // Get selected category filter
-    const tagTerm = document.getElementById("tag-filter").value.toLowerCase(); // Get entered tag filter
-
-    // Filter the games based on the search term, selected category, and tag
-    const filteredGames = window.allGames.filter((game) => {
-        const matchesSearch = game.name.toLowerCase().includes(searchTerm);
-        const matchesCategory = selectedCategory === "" || game.category.toLowerCase().includes(selectedCategory);
-        const matchesTag = tagTerm === "" || game.tag.toLowerCase().includes(tagTerm);
-
-        return matchesSearch && matchesCategory && matchesTag; // Return games that match all filters
-    });
-
-    // Display the filtered games
-    displayGames(filteredGames);
-}
