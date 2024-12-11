@@ -1,12 +1,11 @@
 // backend/server.js
-
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const gamesRoutes = require('./routes/games'); // Import game routes
-const categoriesRoutes = require('./routes/categories'); // Import categories routes
+const gamesRoutes = require('./routes/games');
+const categoriesRoutes = require('./routes/categories');
 
-dotenv.config(); // Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -25,15 +24,13 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/games', gamesRoutes);
-app.use('/api/categories', categoriesRoutes); // Add categories routes for /api/categories
+app.use('/api/categories', categoriesRoutes);
 
-// Handle 404 errors (for routes not defined)
+// Handle 404 errors
 app.use((req, res, next) => {
     res.status(404).json({ message: 'Not Found' });
-  });
-  
+});
 
-// Start the server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
