@@ -1,18 +1,37 @@
 // /scripts/app.js
+
 import { Header } from '../components/header.js';
 import { Filters } from '../components/filters.js';
 
-document.addEventListener("DOMContentLoaded", function() {
-    // Initialize Header and Filters on the Home page
-    if (document.getElementById('header')) {
-        const header = new Header();
-        header.render();
-    }
+function renderHomePage() {
+    document.getElementById('home').innerHTML = `
+        <h1>My Board Games</h1>
+        <div id="game-list">
+            <!-- Dynamically populated games will go here -->
+        </div>
+    `;
+}
 
-    if (document.getElementById('filters')) {
-        const filters = new Filters();
-        filters.render();
-    }
+function renderGameDetailPage() {
+    document.getElementById('game-detail').innerHTML = `
+        <h1>Game Detail</h1>
+        <div id="game-details">
+            <!-- Game details will go here -->
+        </div>
+    `;
+}
 
-    // Here we will later fetch and render games using API data
+document.addEventListener("DOMContentLoaded", function () {
+    const header = new Header();
+    header.render();
+
+    const filters = new Filters();
+    filters.render();
+
+    // Basic routing based on URL hash
+    if (window.location.hash === '#gameDetail') {
+        renderGameDetailPage();
+    } else {
+        renderHomePage();
+    }
 });
