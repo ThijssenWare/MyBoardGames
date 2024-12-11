@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - MyBoardGames</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>MyBoardGames</h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <h2>Register</h2>
+    <form id="register-form">
+      <!-- Username -->
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+
+      <!-- Password -->
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+
+      <!-- Confirm Password -->
+      <label for="confirm-password">Confirm Password:</label>
+      <input type="password" id="confirm-password" name="confirm-password" required>
+
+      <!-- Submit Button -->
+      <button type="submit">Register</button>
+    </form>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2024 MyBoardGames</p>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Add event listener to the registration form
+    const registerForm = document.getElementById('register-form');
+    registerForm.addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent default form submission
+
+      // Get user input
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+
+      // Placeholder for API call to register user
+      console.log(`Registering user: ${username}`);
+
+      // Redirect to login page (simulated)
+      alert('Registration successful! Redirecting to login page...');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

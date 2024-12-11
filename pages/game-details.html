@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Details - MyBoardGames</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>MyBoardGames</h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="login.html" id="login-link">Login</a>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <h2>Game Details</h2>
+    <div id="game-details">
+      <!-- Placeholder for game details -->
+      <img src="../images/placeholder.jpg" alt="Game Image">
+      <h3>Name: Catan</h3>
+      <p>Language: English</p>
+      <p>Rating: 4.5</p>
+      <p>Min Players: 3</p>
+      <p>Max Players: 4</p>
+      <p>Last Played: 2024-12-01</p>
+      <a href="https://boardgamegeek.com" target="_blank">BoardGameGeek Link</a>
+
+      <!-- Game Mode (as string) -->
+      <div id="mode-section">
+        <p><strong>Mode:</strong> <span id="game-mode">Cooperative</span></p>
+      </div>
+
+      <!-- Game Owner Information (only visible when logged in) -->
+      <div id="owner-section" style="display: none;">
+        <p><strong>Owner:</strong> <span id="owner-name">John Doe</span></p>
+        <p><strong>Household:</strong> <span id="household-name">Doe Household</span></p>
+      </div>
+
+      <!-- Edit and Delete Buttons (only visible when logged in) -->
+      <div id="action-buttons" style="display: none;">
+        <button id="edit-btn">Edit Game</button>
+        <button id="delete-btn">Delete Game</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2024 MyBoardGames</p>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Placeholder for checking if the user is logged in
+    let isLoggedIn = false;  // This can be set dynamically based on session or user state
+
+    // Logic to show/hide login button, owner information, and action buttons based on login state
+    const loginLink = document.getElementById('login-link');
+    const ownerSection = document.getElementById('owner-section');
+    const actionButtons = document.getElementById('action-buttons');
+
+    if (isLoggedIn) {
+      loginLink.style.display = 'none';  // Hide login link when logged in
+      ownerSection.style.display = 'block';  // Show owner and household info when logged in
+      actionButtons.style.display = 'block';  // Show edit and delete buttons when logged in
+    } else {
+      loginLink.style.display = 'block';  // Show login link when logged out
+      ownerSection.style.display = 'none';  // Hide owner and household info when logged out
+      actionButtons.style.display = 'none';  // Hide edit and delete buttons when logged out
+    }
+
+    // Example: Load game details dynamically in the future
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('id');
+    console.log(`Game ID: ${gameId}`);
+    
+    // Placeholder logic for dynamic data (to be integrated with backend later)
+    if (!gameId) {
+      alert('Game not found!');
+    }
+  </script>
+</body>
+</html>

@@ -3,27 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MyBoardGames</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="A simple board game listing application with filtering, sorting, and user-specific features.">
+  <title>MyBoardGames - Home</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Header -->
   <header>
-    <h1>Welcome to MyBoardGames</h1>
+    <h1>MyBoardGames</h1>
     <nav>
-      <a href="/">Home</a>
-      <a href="/login">Login</a>
-      <a href="/register">Register</a>
+      <a href="index.html">Home</a>
+      <a href="pages/login.html" id="login-link">Login</a>
+      <a href="pages/register.html">Register</a>
+      <!-- Add toggle button for switching login state -->
+      <button id="toggle-login" style="float: left;">Switch to Logged In</button>
     </nav>
   </header>
+  
 
-  <main>
-    <div id="game-list"></div>  <!-- Dynamically populated by JavaScript -->
-  </main>
+  <!-- Main Layout -->
+  <div id="layout">
+    <!-- Filter Section -->
+    <aside id="filters"></aside>
 
+    <!-- Main Content -->
+    <main id="game-list"></main>
+  </div>
+
+  <!-- Footer -->
   <footer>
-    <p>&copy; 2024 MyBoardGames. All rights reserved.</p>
+    <p>&copy; 2024 MyBoardGames</p>
   </footer>
 
-  <script src="app.js"></script>  <!-- Load JavaScript file -->
+  <script src="scripts/filters.js"></script>
+  <script src="scripts/gamelist.js"></script>
+  <script src="scripts/app.js"></script>
+  <script src="scripts/homeView.js"></script>
+  <script src="scripts/loggedInView.js"></script>
 </body>
 </html>
