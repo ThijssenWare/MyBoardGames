@@ -1,22 +1,29 @@
-<!-- /index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Board Games</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/responsive.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyBoardGames</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header id="header"></header>
+  <header>
+    <h1>Welcome to MyBoardGames</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    </nav>
+  </header>
 
-    <main id="home">
-        <!-- Dynamically populated game list will appear here -->
-    </main>
+  <main>
+    <div id="game-list"></div>  <!-- Dynamically populated by JavaScript -->
+  </main>
 
-    <footer id="footer"></footer>
+  <footer>
+    <p>&copy; 2024 MyBoardGames. All rights reserved.</p>
+  </footer>
 
-    <script src="scripts/app.js"></script>
+  <script src="app.js"></script>  <!-- Load JavaScript file -->
 </body>
 </html>
